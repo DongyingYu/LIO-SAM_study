@@ -37,6 +37,8 @@ public:
     int *cloudNeighborPicked;
     int *cloudLabel;
 
+    // 构造函数，回调函数以及一些初始化操作均在这里进行，
+    // 则在实例化对象时，通过调用构造函数即可实现对整个流程的执行。
     FeatureExtraction()
     {
         subLaserCloudInfo = nh.subscribe<lio_sam::cloud_info>("lio_sam/deskew/cloud_info", 1, &FeatureExtraction::laserCloudInfoHandler, this, ros::TransportHints().tcpNoDelay());
@@ -139,6 +141,7 @@ public:
         }
     }
 
+    // 提取特征
     void extractFeatures()
     {
         // 
@@ -163,10 +166,12 @@ public:
 
                 std::sort(cloudSmoothness.begin()+sp, cloudSmoothness.begin()+ep, by_value());
 
+                // 点面特征的筛选条件均是依据曲率，但是判断条件相反，故分前、后两个遍历进行
                 int largestPickedNum = 0;
                 for (int k = ep; k >= sp; k--)
                 {
                     int ind = cloudSmoothness[k].ind;
+                    // 边特征的筛选
                     if (cloudNeighborPicked[ind] == 0 && cloudCurvature[ind] > edgeThreshold)
                     {
                         largestPickedNum++;
@@ -195,12 +200,14 @@ public:
                     }
                 }
 
+                // 平面特征的筛选
                 for (int k = sp; k <= ep; k++)
                 {
                     int ind = cloudSmoothness[k].ind;
                     if (cloudNeighborPicked[ind] == 0 && cloudCurvature[ind] < surfThreshold)
                     {
 
+                        // 设置label为-1，后续面特征的筛选以此为条件
                         cloudLabel[ind] = -1;
                         cloudNeighborPicked[ind] = 1;
 

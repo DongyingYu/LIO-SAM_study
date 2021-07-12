@@ -53,7 +53,9 @@ public:
             // try catch语句可进行异常值的捕获
             try
             {
+                // 使用waitForTransform()可以得到某个指定时间的transform。等待lidarFrame到baselinkFrame的坐标转换
                 tfListener.waitForTransform(lidarFrame, baselinkFrame, ros::Time(0), ros::Duration(3.0));
+                // 得到从lidarFrame至baselinkFrame的转换，ros::Time(0)指最近时刻存储的数据
                 tfListener.lookupTransform(lidarFrame, baselinkFrame, ros::Time(0), lidar2Baselink);
             }
             catch (tf::TransformException ex)
@@ -98,6 +100,7 @@ public:
         // static tf
         static tf::TransformBroadcaster tfMap2Odom;
         static tf::Transform map_to_odom = tf::Transform(tf::createQuaternionFromRPY(0, 0, 0), tf::Vector3(0, 0, 0));
+        // StampedTransform()是一个构造函数，给数据赋值，传入的参数中，map_to_odom包含tf的具体数据，mapFrame是父坐标系，odometryFrame是子坐标系
         tfMap2Odom.sendTransform(tf::StampedTransform(map_to_odom, odomMsg->header.stamp, mapFrame, odometryFrame));
 
         std::lock_guard<std::mutex> lock(mtx);
@@ -185,6 +188,7 @@ public:
     gtsam::PreintegratedImuMeasurements *imuIntegratorOpt_;
     gtsam::PreintegratedImuMeasurements *imuIntegratorImu_;
 
+    // 双向队列
     std::deque<sensor_msgs::Imu> imuQueOpt;
     std::deque<sensor_msgs::Imu> imuQueImu;
 
@@ -218,6 +222,7 @@ public:
 
         pubImuOdometry = nh.advertise<nav_msgs::Odometry> (odomTopic+"_incremental", 2000);
 
+        // gtasm中自带IMU预积分的库？
         boost::shared_ptr<gtsam::PreintegrationParams> p = gtsam::PreintegrationParams::MakeSharedU(imuGravity);
         p->accelerometerCovariance  = gtsam::Matrix33::Identity(3,3) * pow(imuAccNoise, 2); // acc white noise in continuous
         p->gyroscopeCovariance      = gtsam::Matrix33::Identity(3,3) * pow(imuGyrNoise, 2); // gyro white noise in continuous

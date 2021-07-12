@@ -911,6 +911,7 @@ public:
     {
         updatePointAssociateToMap();
 
+        // 使用omp多线程进行优化
         #pragma omp parallel for num_threads(numberOfCores)
         for (int i = 0; i < laserCloudCornerLastDSNum; i++)
         {
