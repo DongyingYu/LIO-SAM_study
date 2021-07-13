@@ -500,6 +500,7 @@ public:
         }
 
         // ICP Settings
+        // 使用pcl库中的函数进行icp迭代算法求解
         static pcl::IterativeClosestPoint<PointType, PointType> icp;
         icp.setMaxCorrespondenceDistance(historyKeyframeSearchRadius*2);
         icp.setMaximumIterations(100);
@@ -1629,6 +1630,7 @@ public:
         // Publish surrounding key frames
         publishCloud(&pubRecentKeyFrames, laserCloudSurfFromMapDS, timeLaserInfoStamp, odometryFrame);
         // publish registered key frame
+        // 如果有订阅者，则会执行发布
         if (pubRecentKeyFrame.getNumSubscribers() != 0)
         {
             pcl::PointCloud<PointType>::Ptr cloudOut(new pcl::PointCloud<PointType>());
