@@ -80,6 +80,7 @@ public:
         publishFeatureCloud();
     }
     //计算点云平滑度
+    // 这里是用来找到每一个scan的分界点
     void calculateSmoothness()
     {
         int cloudSize = extractedCloud->points.size();
